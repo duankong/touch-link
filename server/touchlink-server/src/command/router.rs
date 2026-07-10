@@ -117,7 +117,6 @@ impl Router {
         let (dx, dy) = ScrollPayload::decode(payload)?;
         let scroll_x = (dx * 2400.0) as i32;
         let scroll_y = (dy * 2400.0) as i32;
-        tracing::debug!("Scroll dx={:.4} dy={:.4} → scroll_x={} scroll_y={}", dx, dy, scroll_x, scroll_y);
         self.mouse.scroll(scroll_x, scroll_y);
         Ok(())
     }
