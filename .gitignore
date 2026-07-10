@@ -7,6 +7,11 @@ android/TouchLink/app/build/
 android/TouchLink/.gradle/
 android/TouchLink/local.properties
 
+# Project docs (not for GitHub)
+CLAUDE.md
+AGENTS.md
+docs/plans/
+
 # Misc
 .mimocode/
 
