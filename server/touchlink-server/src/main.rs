@@ -25,6 +25,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     });
 
+    // Background UDP broadcast announcer (fallback when mDNS is blocked)
+    tokio::spawn(async {
+        if let Err(e) = discovery::broadcast("TouchLink-Server", 42069).await {
+            tracing::error!("UDP broadcast error: {e}");
+        }
+    });
+
     // Main event loop — receive packets and dispatch to the router
     loop {
         tokio::select! {
