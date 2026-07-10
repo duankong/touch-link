@@ -1,0 +1,136 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  # ── Build Rust server (Windows) ───────────────────────────────
+  build-server:
+    name: Build server (Windows)
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: server/touchlink-server
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: server/touchlink-server
+
+      - name: Build release
+        run: cargo build --release
+
+      - name: Upload server binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: touchlink-server
+          path: server/touchlink-server/target/release/touchlink-server.exe
+
+  # ── Build Android APK (Ubuntu) ────────────────────────────────
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android/TouchLink
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            android/TouchLink/.gradle
+          key: gradle-${{ runner.os }}-${{ hashFiles('android/TouchLink/**/*.gradle.kts') }}
+          restore-keys: gradle-${{ runner.os }}-
+
+      - name: Accept Android licenses
+        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 || true
+
+      - name: Build APK
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: touchlink-apk
+          path: android/TouchLink/app/build/outputs/apk/debug/app-debug.apk
+
+  # ── Create Release & attach artifacts ─────────────────────────
+  release:
+    name: Create Release
+    needs: [build-server, build-android]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download server binary
+        uses: actions/download-artifact@v4
+        with:
+          name: touchlink-server
+
+      - name: Download APK
+        uses: actions/download-artifact@v4
+        with:
+          name: touchlink-apk
+
+      - name: Extract version from tag
+        shell: bash
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
+
+      - name: Rename artifacts
+        run: |
+          mv touchlink-server.exe "TouchLink-v${{ env.VERSION }}.exe"
+          mv app-debug.apk "TouchLink-v${{ env.VERSION }}.apk"
+
+      - name: Generate release notes
+        shell: bash
+        run: |
+          cat > RELEASE_NOTES.md << 'EOF'
+          # TouchLink ${{ env.VERSION }}
+
+          手机触控控制电脑 — Android phone as a wireless touchpad/keyboard for Windows.
+
+          ## 下载
+
+          | 文件 | 说明 |
+          |------|------|
+          | `TouchLink-v${{ env.VERSION }}.apk` | 安卓 APK，在手机上安装 |
+          | `TouchLink-v${{ env.VERSION }}.exe` | Windows 服务端，双击运行 |
+
+          ## 使用
+
+          1. 电脑端运行 `TouchLink-v${{ env.VERSION }}.exe`
+          2. 手机安装 APK 并打开，确保在同一 WiFi
+          3. 点击「扫描设备」→ 连接电脑
+          EOF
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body_path: RELEASE_NOTES.md
+          files: |
+            TouchLink-v${{ env.VERSION }}.exe
+            TouchLink-v${{ env.VERSION }}.apk
