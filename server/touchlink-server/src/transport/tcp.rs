@@ -29,10 +29,9 @@ impl TcpTransport {
         Packet::decode(&full)
     }
 
-    pub async fn send_packet(&self, pkt: &Packet) -> crate::error::Result<()> {
+    pub async fn send_packet(&mut self, pkt: &Packet) -> crate::error::Result<()> {
         let data = pkt.encode();
-        let mut stream = &self.stream;
-        stream.write_all(&data).await?;
+        self.stream.write_all(&data).await?;
         Ok(())
     }
 }

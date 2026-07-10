@@ -5,7 +5,10 @@ edition = "2021"
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }
-windows-sys = "0.59"
+windows-sys = { version = "0.59", features = [
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_WindowsAndMessaging",
+] }
 libmdns = "0.8"
 thiserror = "2"
 tracing = "0.1"

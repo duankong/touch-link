@@ -1,0 +1,16 @@
+# Rust build artifacts
+server/touchlink-server/target/
+
+# Android build artifacts
+android/TouchLink/build/
+android/TouchLink/.gradle/
+android/TouchLink/local.properties
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

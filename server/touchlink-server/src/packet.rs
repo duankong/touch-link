@@ -118,8 +118,10 @@ impl Packet {
 }
 
 // Touch event payload helpers
+#[allow(dead_code)]
 pub struct TouchPayload;
 
+#[allow(dead_code)]
 impl TouchPayload {
     pub fn encode(finger_id: u8, x: f32, y: f32) -> Vec<u8> {
         let mut buf = Vec::with_capacity(9);
