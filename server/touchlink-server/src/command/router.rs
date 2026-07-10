@@ -34,6 +34,7 @@ impl Router {
             Opcode::TouchUp => self.handle_touch_up(&pkt.payload),
             Opcode::Scroll => self.handle_scroll(&pkt.payload),
             Opcode::Pinch => self.handle_pinch(&pkt.payload),
+            Opcode::TouchCancel => self.handle_touch_cancel(),
             Opcode::KeyDown => self.handle_key_down(&pkt.payload),
             Opcode::KeyUp => self.handle_key_up(&pkt.payload),
             Opcode::TextType => self.handle_text_type(&pkt.payload),
@@ -56,7 +57,16 @@ impl Router {
         }
     }
 
-    // ── Touch handlers (trackpad-style: record position, then delta-move) ──
+    // ── Touch / Cancel handlers ──────────────────────────────────
+
+    fn handle_touch_cancel(&mut self) -> Result<()> {
+        // Clear all touch state without triggering any click.
+        // Used when a multi-finger gesture ends and the remaining
+        // finger should not produce a tap.
+        self.last_positions.clear();
+        self.down_positions.clear();
+        Ok(())
+    }
 
     fn handle_touch_down(&mut self, payload: &[u8]) -> Result<()> {
         let (finger_id, x, y) = TouchPayload::decode(payload)?;
@@ -104,8 +114,11 @@ impl Router {
     // ── Scroll / pinch handlers ─────────────────────────────────
 
     fn handle_scroll(&self, payload: &[u8]) -> Result<()> {
-        let (_dx, dy) = ScrollPayload::decode(payload)?;
-        self.mouse.scroll((dy * 120.0) as i32);
+        let (dx, dy) = ScrollPayload::decode(payload)?;
+        let scroll_x = (dx * 2400.0) as i32;
+        let scroll_y = (dy * 2400.0) as i32;
+        tracing::debug!("Scroll dx={:.4} dy={:.4} → scroll_x={} scroll_y={}", dx, dy, scroll_x, scroll_y);
+        self.mouse.scroll(scroll_x, scroll_y);
         Ok(())
     }
 

@@ -8,6 +8,7 @@ value class Opcode(val value: UShort) {
         val TouchUp = Opcode(0x0003u)
         val Scroll = Opcode(0x0004u)
         val Pinch = Opcode(0x0005u)
+        val TouchCancel = Opcode(0x0006u)
         val KeyDown = Opcode(0x0010u)
         val KeyUp = Opcode(0x0011u)
         val TextType = Opcode(0x0012u)

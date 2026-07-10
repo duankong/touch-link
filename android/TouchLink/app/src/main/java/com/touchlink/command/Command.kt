@@ -16,6 +16,7 @@ sealed class Command {
     data class Scroll(val dx: Float, val dy: Float) : Command()
     data class Pinch(val scale: Float) : Command()
     data class Key(val vk: UShort, val down: Boolean) : Command()
+    data object TouchCancel : Command()
     data object Heartbeat : Command()
 
     /** Convert this Command into an (Opcode, ByteArray) pair ready for Packet encoding. */
@@ -30,6 +31,7 @@ sealed class Command {
                 val opcode = if (down) Opcode.KeyDown else Opcode.KeyUp
                 opcode to KeyPayload.encode(vk)
             }
+            TouchCancel -> Opcode.TouchCancel to ByteArray(0)
             Heartbeat -> Opcode.Heartbeat to ByteArray(0)
         }
     }

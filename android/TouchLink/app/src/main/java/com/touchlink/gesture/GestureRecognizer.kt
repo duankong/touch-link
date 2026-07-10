@@ -15,6 +15,7 @@ class GestureRecognizer {
     private var lastTapTime = 0L
     private var lastTapFinger = -1
     private var pendingDoubleTap = false
+    private var wasMultiFinger = false
 
     /** Process a single TouchEvent and return zero or more Commands to send. */
     fun process(event: TouchEvent): List<Command> {
@@ -27,6 +28,10 @@ class GestureRecognizer {
 
     private fun handleDown(event: TouchEvent): List<Command> {
         activeFingers[event.fingerId] = event
+
+        if (activeFingers.size >= 2) {
+            wasMultiFinger = true
+        }
 
         val commands = mutableListOf<Command>(
             Command.TouchDown(event.fingerId.toByte(), event.x, event.y)
@@ -50,15 +55,22 @@ class GestureRecognizer {
     }
 
     private fun handleMove(event: TouchEvent): List<Command> {
+        // Capture previous position before overwriting
+        val prev = activeFingers[event.fingerId]
         activeFingers[event.fingerId] = event
 
         return if (activeFingers.size >= 2) {
-            // Multi-finger: produce scroll from the average movement
-            val values = activeFingers.values.toList()
-            val avgX = values.map { it.x }.average().toFloat()
-            val avgY = values.map { it.y }.average().toFloat()
-            val prevSelf = values.firstOrNull { it.fingerId == event.fingerId } ?: event
-            listOf(Command.Scroll(event.x - prevSelf.x, event.y - prevSelf.y))
+            wasMultiFinger = true
+            // Multi-finger scroll: delta of the moving finger
+            // (only one finger triggers MOVE per event)
+            val dx = event.x - (prev?.x ?: event.x)
+            val dy = event.y - (prev?.y ?: event.y)
+            listOf(Command.Scroll(dx, dy))
+        } else if (wasMultiFinger) {
+            // After a multi-finger gesture (e.g. scroll), a remaining finger
+            // that hasn't lifted yet should not trigger cursor movement.
+            // User must lift all fingers before single-finger mouse move resumes.
+            emptyList()
         } else {
             // Single finger: mouse move
             listOf(Command.TouchMove(event.fingerId.toByte(), event.x, event.y))
@@ -67,6 +79,18 @@ class GestureRecognizer {
 
     private fun handleUp(event: TouchEvent): List<Command> {
         activeFingers.remove(event.fingerId)
+
+        if (wasMultiFinger && activeFingers.isEmpty()) {
+            // Last finger lifted after a multi-finger gesture.
+            // Send TouchCancel instead of TouchUp so the server
+            // clears all touch state without triggering a click.
+            wasMultiFinger = false
+            return listOf(Command.TouchCancel)
+        }
+
+        if (activeFingers.isEmpty()) {
+            wasMultiFinger = false
+        }
         return listOf(Command.TouchUp(event.fingerId.toByte(), event.x, event.y))
     }
 
@@ -74,5 +98,6 @@ class GestureRecognizer {
     fun reset() {
         activeFingers.clear()
         pendingDoubleTap = false
+        wasMultiFinger = false
     }
 }

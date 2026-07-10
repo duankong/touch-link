@@ -2,7 +2,7 @@ use windows_sys::Win32::Foundation::POINT;
 use windows_sys::Win32::UI::Input::KeyboardAndMouse::{
     SendInput, INPUT, INPUT_0, MOUSEINPUT, MOUSEEVENTF_MOVE, MOUSEEVENTF_ABSOLUTE,
     MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP, MOUSEEVENTF_RIGHTDOWN, MOUSEEVENTF_RIGHTUP,
-    MOUSEEVENTF_WHEEL, INPUT_MOUSE,
+    MOUSEEVENTF_WHEEL, MOUSEEVENTF_HWHEEL, INPUT_MOUSE,
 };
 use windows_sys::Win32::UI::WindowsAndMessaging::{GetCursorPos, GetSystemMetrics};
 
@@ -132,17 +132,26 @@ impl Mouse {
         unsafe { send_mouse_event(MOUSEEVENTF_RIGHTUP); }
     }
 
-    /// Scroll wheel. Positive = up, negative = down.
-    pub fn scroll(&self, delta: i32) {
-        let mi = MOUSEINPUT {
-            dx: 0,
-            dy: 0,
-            mouseData: delta as u32,
-            dwFlags: MOUSEEVENTF_WHEEL,
-            time: 0,
-            dwExtraInfo: 0,
-        };
-        unsafe { send_input_mouse(mi); }
+    /// Scroll wheel. dy positive = up, dy negative = down, dx positive = right, dx negative = left.
+    pub fn scroll(&self, dx: i32, dy: i32) {
+        if dy != 0 {
+            let mi = MOUSEINPUT {
+                dx: 0, dy: 0,
+                mouseData: dy as u32,
+                dwFlags: MOUSEEVENTF_WHEEL,
+                time: 0, dwExtraInfo: 0,
+            };
+            unsafe { send_input_mouse(mi); }
+        }
+        if dx != 0 {
+            let mi = MOUSEINPUT {
+                dx: 0, dy: 0,
+                mouseData: dx as u32,
+                dwFlags: MOUSEEVENTF_HWHEEL,
+                time: 0, dwExtraInfo: 0,
+            };
+            unsafe { send_input_mouse(mi); }
+        }
     }
 }
 

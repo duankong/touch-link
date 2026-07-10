@@ -20,6 +20,7 @@ pub enum Opcode {
     TouchUp = 0x0003,
     Scroll = 0x0004,
     Pinch = 0x0005,
+    TouchCancel = 0x0006,
     // Keyboard
     KeyDown = 0x0010,
     KeyUp = 0x0011,
@@ -44,6 +45,7 @@ impl Opcode {
             0x0003 => Some(Self::TouchUp),
             0x0004 => Some(Self::Scroll),
             0x0005 => Some(Self::Pinch),
+            0x0006 => Some(Self::TouchCancel),
             0x0010 => Some(Self::KeyDown),
             0x0011 => Some(Self::KeyUp),
             0x0012 => Some(Self::TextType),
@@ -202,6 +204,7 @@ mod tests {
             Opcode::TouchUp,
             Opcode::Scroll,
             Opcode::Pinch,
+            Opcode::TouchCancel,
             Opcode::KeyDown,
             Opcode::KeyUp,
             Opcode::TextType,
