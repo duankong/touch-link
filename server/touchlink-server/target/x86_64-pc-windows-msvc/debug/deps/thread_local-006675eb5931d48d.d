@@ -1,0 +1,10 @@
+D:\Data\iosapp\server\touchlink-server\target\x86_64-pc-windows-msvc\debug\deps\thread_local-006675eb5931d48d.d: C:\Users\Windows\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thread_local-1.1.9\src\lib.rs C:\Users\Windows\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thread_local-1.1.9\src\cached.rs C:\Users\Windows\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thread_local-1.1.9\src\thread_id.rs C:\Users\Windows\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thread_local-1.1.9\src\unreachable.rs
+
+D:\Data\iosapp\server\touchlink-server\target\x86_64-pc-windows-msvc\debug\deps\libthread_local-006675eb5931d48d.rlib: C:\Users\Windows\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thread_local-1.1.9\src\lib.rs C:\Users\Windows\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thread_local-1.1.9\src\cached.rs C:\Users\Windows\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thread_local-1.1.9\src\thread_id.rs C:\Users\Windows\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thread_local-1.1.9\src\unreachable.rs
+
+D:\Data\iosapp\server\touchlink-server\target\x86_64-pc-windows-msvc\debug\deps\libthread_local-006675eb5931d48d.rmeta: C:\Users\Windows\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thread_local-1.1.9\src\lib.rs C:\Users\Windows\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thread_local-1.1.9\src\cached.rs C:\Users\Windows\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thread_local-1.1.9\src\thread_id.rs C:\Users\Windows\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thread_local-1.1.9\src\unreachable.rs
+
+C:\Users\Windows\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thread_local-1.1.9\src\lib.rs:
+C:\Users\Windows\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thread_local-1.1.9\src\cached.rs:
+C:\Users\Windows\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thread_local-1.1.9\src\thread_id.rs:
+C:\Users\Windows\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thread_local-1.1.9\src\unreachable.rs:
