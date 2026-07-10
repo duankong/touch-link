@@ -145,8 +145,10 @@ impl TouchPayload {
     }
 }
 
+#[allow(dead_code)]
 pub struct ScrollPayload;
 
+#[allow(dead_code)]
 impl ScrollPayload {
     pub fn encode(dx: f32, dy: f32) -> Vec<u8> {
         let mut buf = Vec::with_capacity(8);
@@ -168,8 +170,10 @@ impl ScrollPayload {
     }
 }
 
+#[allow(dead_code)]
 pub struct KeyPayload;
 
+#[allow(dead_code)]
 impl KeyPayload {
     pub fn encode(key_code: u16) -> Vec<u8> {
         key_code.to_be_bytes().to_vec()

@@ -3,8 +3,12 @@ server/touchlink-server/target/
 
 # Android build artifacts
 android/TouchLink/build/
+android/TouchLink/app/build/
 android/TouchLink/.gradle/
 android/TouchLink/local.properties
+
+# Misc
+.mimocode/
 
 # IDE
 .idea/
