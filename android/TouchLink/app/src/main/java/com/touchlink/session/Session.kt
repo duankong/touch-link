@@ -37,4 +37,13 @@ class Session(
     fun resetSequence() {
         seq = 0u
     }
+
+    /** Close the session and release the underlying transport. */
+    fun close() {
+        try {
+            transport.close()
+        } catch (_: Exception) {
+            // Best-effort close
+        }
+    }
 }

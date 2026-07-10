@@ -6,14 +6,12 @@ mod packet;
 mod session;
 pub mod transport;
 
-use std::sync::Arc;
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
     tracing::info!("TouchLink server starting...");
 
-    let router = Arc::new(command::Router::new());
+    let mut router = command::Router::new();
     let mut udp = transport::udp::UdpTransport::bind("0.0.0.0:42069").await?;
 
     tracing::info!("UDP transport bound to 0.0.0.0:42069");

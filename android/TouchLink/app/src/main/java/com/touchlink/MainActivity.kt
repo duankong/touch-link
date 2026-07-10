@@ -7,11 +7,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.touchlink.session.Session
@@ -55,14 +57,53 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     if (connectionState == ConnectionState.Connected && selectedDevice != null) {
-                        AndroidView(
-                            modifier = Modifier.fillMaxSize(),
-                            factory = { ctx ->
-                                TouchpadView(ctx).apply {
-                                    onCommand = { cmd -> session?.send(cmd) }
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            // Top bar with device info and disconnect button
+                            Surface(
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                tonalElevation = 2.dp,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column {
+                                        Text(
+                                            text = selectedDevice!!.name,
+                                            style = MaterialTheme.typography.titleSmall,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                        Text(
+                                            text = selectedDevice!!.host,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    FilledTonalButton(onClick = {
+                                        session?.close()
+                                        connectionState = ConnectionState.Disconnected
+                                        selectedDevice = null
+                                    }) {
+                                        Text("断开")
+                                    }
                                 }
                             }
-                        )
+                            // Touchpad
+                            AndroidView(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .weight(1f),
+                                factory = { ctx ->
+                                    TouchpadView(ctx).apply {
+                                        onCommand = { cmd -> session?.send(cmd) }
+                                    }
+                                }
+                            )
+                        }
                     } else {
                         ConnectionScreen(
                             devices = devices,

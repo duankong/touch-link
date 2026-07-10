@@ -3,6 +3,22 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+// ── Version auto-increment ─────────────────────────────────────
+val versionFile = rootProject.file("version.properties")
+fun readNum(f: java.io.File): Int = try {
+    f.readLines().firstOrNull { it.startsWith("buildNumber=") }
+        ?.substringAfter("=")?.trim()?.toInt() ?: 0
+} catch (_: Exception) { 0 }
+fun writeNum(f: java.io.File, n: Int) {
+    val lines = f.readLines().filter { !it.startsWith("buildNumber=") }
+    f.writeText((lines + "buildNumber=$n").joinToString("\n") + "\n")
+}
+val buildNumber = readNum(versionFile).let { prev ->
+    val next = if (prev <= 0) 1 else prev + 1
+    writeNum(versionFile, next)
+    next
+}
+
 android {
     namespace = "com.touchlink"
     compileSdk = 34
@@ -11,8 +27,8 @@ android {
         applicationId = "com.touchlink"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = buildNumber
+        versionName = "0.1.${buildNumber}"
     }
 
     buildFeatures {
