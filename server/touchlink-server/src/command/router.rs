@@ -9,13 +9,19 @@ pub struct Router {
     mouse: Mouse,
     /// Track last reported position per finger for delta computation.
     last_positions: HashMap<u8, (f32, f32)>,
+    /// Track initial touch-down positions for tap-vs-drag detection.
+    down_positions: HashMap<u8, (f32, f32)>,
 }
+
+/// Maximum normalized distance for a touch to qualify as a tap (click).
+const TAP_THRESHOLD: f32 = 0.03;
 
 impl Router {
     pub fn new() -> Self {
         Self {
             mouse: Mouse::new(),
             last_positions: HashMap::new(),
+            down_positions: HashMap::new(),
         }
     }
 
@@ -54,9 +60,9 @@ impl Router {
 
     fn handle_touch_down(&mut self, payload: &[u8]) -> Result<()> {
         let (finger_id, x, y) = TouchPayload::decode(payload)?;
-        // Record start position so subsequent moves compute delta from it.
+        // Record start position for delta computation and tap detection.
         self.last_positions.insert(finger_id, (x, y));
-        self.mouse.left_down();
+        self.down_positions.insert(finger_id, (x, y));
         Ok(())
     }
 
@@ -72,9 +78,26 @@ impl Router {
     }
 
     fn handle_touch_up(&mut self, payload: &[u8]) -> Result<()> {
-        let (finger_id, _x, _y) = TouchPayload::decode(payload)?;
+        let (finger_id, x, y) = TouchPayload::decode(payload)?;
+
+        // Detect tap: finger moved less than TAP_THRESHOLD since touch-down.
+        let is_tap = self.down_positions.get(&finger_id)
+            .is_some_and(|&(dx, dy)| {
+                let dist = ((x - dx).powi(2) + (y - dy).powi(2)).sqrt();
+                dist < TAP_THRESHOLD
+            });
+
+        // Only responsible for click when this is the sole active finger.
+        // Multi-finger gestures (scroll) should not produce phantom clicks.
+        let sole_finger = self.last_positions.len() <= 1;
+
+        if is_tap && sole_finger {
+            self.mouse.left_down();
+            self.mouse.left_up();
+        }
+
         self.last_positions.remove(&finger_id);
-        self.mouse.left_up();
+        self.down_positions.remove(&finger_id);
         Ok(())
     }
 

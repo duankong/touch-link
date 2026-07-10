@@ -34,8 +34,8 @@ class MainActivity : ComponentActivity() {
     private var session: Session? = null
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    /** Set of discovered devices, deduplicated by host:port. */
-    private val deviceSet = mutableSetOf<DiscoveredDevice>()
+    /** Thread-safe set of discovered devices, deduplicated by host:port. */
+    private val deviceSet = java.util.Collections.synchronizedSet(mutableSetOf<DiscoveredDevice>())
 
     /** Runtime permission launcher for location (required by NSD on Android 11+). */
     private val locationPermissionLauncher = registerForActivityResult(
@@ -126,8 +126,10 @@ class MainActivity : ComponentActivity() {
     /**
      * Start both NSD and UDP broadcast discovery in parallel.
      * On Android 11+, NSD requires location permission; if denied, only UDP broadcast is used.
+     * Stops any previously running discovery before starting new instances.
      */
     private fun startScanning(onDevicesChanged: (List<DiscoveredDevice>) -> Unit) {
+        stopScanning()
         deviceSet.clear()
         onDevicesChanged(emptyList())
 
@@ -137,7 +139,13 @@ class MainActivity : ComponentActivity() {
             onDevicesChanged(deviceSet.toList())
         }
         udpDiscovery = udp
-        scope.launch { udp.start() }
+        scope.launch {
+            try {
+                udp.start()
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "UDP discovery error", e)
+            }
+        }
 
         // 2. Start NSD discovery if location permission is granted (Android 11+)
         if (hasLocationPermission()) {
